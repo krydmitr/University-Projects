@@ -1,0 +1,55 @@
+version: '3.8'
+services:
+  broker:
+    build: ./broker
+    container_name: broker
+    ports:
+      - "50000:50000"
+    networks:
+      - compnet1
+  producer:
+    build: ./producer
+    container_name: producer
+    depends_on:
+      - broker
+    ports:
+      - "50001:50001"
+    networks:
+      - compnet1
+  consumer:
+    build: ./consumer
+    container_name: consumer
+    stdin_open: true
+    tty: true
+    depends_on:
+      - broker
+      - producer
+    ports:
+      - "50002:50002"
+    networks:
+      - compnet1
+  producer2:
+    build: ./producer2
+    container_name: producer2
+    depends_on:
+      - broker
+    ports:
+      - "50003:50003"
+    networks:
+      - compnet1
+  consumer2:
+    build: ./consumer2
+    container_name: consumer2
+    stdin_open: true
+    tty: true
+    depends_on:
+      - broker
+      - producer2
+    ports:
+      - "50004:50004"
+    networks:
+      - compnet1
+  
+networks:
+  compnet1:
+    driver: host

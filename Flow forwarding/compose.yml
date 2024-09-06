@@ -1,0 +1,115 @@
+version: '3.8'
+services:
+  # 4 endpoints and 3 routers and 4 networks
+  endpoint_3:
+    build: ./endpoint_3
+    container_name: endpoint_3
+    # depends_on:
+      # - endpoint_4
+    environment:
+      HOSTNAME: endpoint_3
+    networks:
+      - edge_2
+  endpoint_2:
+    build: ./endpoint_2
+    container_name: endpoint_2
+    depends_on:
+      - endpoint_3
+    environment:
+      HOSTNAME: endpoint_2
+    networks:
+      - central
+        # ipv4_address: 172.25.0.2
+  endpoint_4:
+    build: ./endpoint_4
+    container_name: endpoint_4
+    depends_on:
+      - endpoint_3
+    environment:
+      HOSTNAME: endpoint_4
+    networks:
+      - edge_3
+  router_1:
+    build: ./router_1
+    container_name: router_1
+    depends_on:
+      - endpoint_3
+    environment:
+      HOSTNAME: router_1
+    networks:
+      - edge_1
+      - central
+  router_2:
+    build: ./router_2
+    container_name: router_2
+    depends_on:
+      - endpoint_3
+    environment:
+      HOSTNAME: router_2
+    networks:
+      - edge_2
+      - central
+  router_3:
+    build: ./router_3
+    container_name: router_3
+    depends_on:
+      - endpoint_3
+    environment:
+      HOSTNAME: router_3
+    networks:
+      - edge_3
+      - central
+  endpoint_1:
+    build: ./endpoint_1
+    container_name: endpoint_1
+    # stdin_open: true
+    # tty: true
+    depends_on:
+      - endpoint_2
+      - endpoint_3
+      - endpoint_4
+      - router_1
+      - router_2
+      - router_3
+    environment:
+      HOSTNAME: endpoint_1
+    # ports:
+    #   - "50000:50000"
+    networks:
+      - edge_1
+  
+  # watcher:
+  #   build:
+  #     context: .
+  #     dockerfile: ./watcher/Dockerfile
+  #   volumes:
+  #     - ./pcap:/pcap
+  #   networks:
+  #     - edge_1
+  #     - edge_2
+  #     - acc_1
+  #     - acc_2
+  #   privileged: true
+
+  
+networks:
+  edge_1:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/24
+  edge_2:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.23.0.0/24 
+  edge_3:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.1.0/24  
+  central:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.169.0.0/24
